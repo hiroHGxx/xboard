@@ -1,0 +1,27 @@
+{
+  "name": "xboard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Multiple X (Twitter) account timeline widget for web embedding",
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "test": "turbo test",
+    "clean": "turbo clean"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^18.4.3",
+    "@commitlint/config-conventional": "^18.4.3",
+    "eslint": "^8.56.0",
+    "husky": "^8.0.3",
+    "prettier": "^3.1.1",
+    "turbo": "^1.11.2"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0"
+}

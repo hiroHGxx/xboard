@@ -1,0 +1,17 @@
+[build]
+  command = "pnpm run build"
+  publish = "apps/widget/dist"
+
+[functions]
+  directory = "packages/api/netlify-functions"
+  node_bundler = "esbuild"
+
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Netlify-CDN-Cache-Control = "public, s-maxage=30"
+
+[[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
