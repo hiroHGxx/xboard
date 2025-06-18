@@ -1,8 +1,7 @@
 [build]
   base = ""
-  command = "ls -la && pwd && cd xboard/apps/widget && pnpm install && pnpm run build"
+  command = "cd xboard/apps/widget && pnpm install && pnpm run build"
   publish = "xboard/apps/widget/dist"
-  ignore = false
 
 [build.environment]
   NODE_VERSION = "20"
