@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoard 埋め込みデモ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+            XBoard 埋め込みデモ
+        </h1>
+        
+        <!-- 基本的な埋め込み -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">1. 基本的な埋め込み</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div id="xboard-basic"></div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;div id="xboard-basic"&gt;&lt;/div&gt;
+&lt;script src="/xboard-embed.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  XBoard.create('#xboard-basic', {
+    accounts: 'elonmusk,twitter',
+    limit: 4
+  });
+&lt;/script&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- データ属性での埋め込み -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">2. データ属性での自動初期化</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div data-xboard 
+                     data-accounts="elonmusk" 
+                     data-limit="3" 
+                     data-theme="light"
+                     data-layout="column">
+                </div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;div data-xboard 
+     data-accounts="elonmusk" 
+     data-limit="3" 
+     data-theme="light"
+     data-layout="column"&gt;
+&lt;/div&gt;
+&lt;script src="/xboard-embed.js"&gt;&lt;/script&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- ダークテーマ -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">3. ダークテーマ</h2>
+            <div class="bg-gray-900 p-6 rounded-lg shadow-sm border">
+                <div id="xboard-dark"></div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;div id="xboard-dark"&gt;&lt;/div&gt;
+&lt;script&gt;
+  XBoard.create('#xboard-dark', {
+    accounts: 'twitter',
+    limit: 2,
+    theme: 'dark',
+    maxColumns: 2
+  });
+&lt;/script&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- カスタム設定 -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">4. カスタム設定</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div id="xboard-custom"></div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;div id="xboard-custom"&gt;&lt;/div&gt;
+&lt;script&gt;
+  XBoard.create('#xboard-custom', {
+    accounts: 'elonmusk,twitter',
+    limit: 6,
+    theme: 'auto',
+    layout: 'grid',
+    maxColumns: 3,
+    refreshInterval: 60000 // 1分
+  });
+&lt;/script&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- 使用方法説明 -->
+        <section class="mb-12 bg-blue-50 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold text-blue-900 mb-4">📖 使用方法</h2>
+            <div class="text-blue-800 space-y-2">
+                <p><strong>1. スクリプト読み込み:</strong></p>
+                <code class="bg-blue-100 px-2 py-1 rounded">&lt;script src="https://your-domain.com/xboard-embed.js"&gt;&lt;/script&gt;</code>
+                
+                <p class="pt-4"><strong>2. HTMLに埋め込み:</strong></p>
+                <code class="bg-blue-100 px-2 py-1 rounded">&lt;div id="my-timeline"&gt;&lt;/div&gt;</code>
+                
+                <p class="pt-4"><strong>3. 初期化:</strong></p>
+                <code class="bg-blue-100 px-2 py-1 rounded">XBoard.create('#my-timeline', { accounts: 'elonmusk' });</code>
+            </div>
+        </section>
+
+        <!-- オプション一覧 -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">⚙️ オプション一覧</h2>
+            <div class="bg-white rounded-lg shadow-sm border overflow-hidden">
+                <table class="w-full text-sm">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-3 text-left font-medium text-gray-700">オプション</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-700">デフォルト</th>
+                            <th class="px-4 py-3 text-left font-medium text-gray-700">説明</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200">
+                        <tr>
+                            <td class="px-4 py-3 font-mono text-blue-600">accounts</td>
+                            <td class="px-4 py-3">elonmusk,twitter</td>
+                            <td class="px-4 py-3">表示するXアカウント（カンマ区切り）</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-mono text-blue-600">limit</td>
+                            <td class="px-4 py-3">10</td>
+                            <td class="px-4 py-3">表示するツイート数（1-50）</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-mono text-blue-600">theme</td>
+                            <td class="px-4 py-3">auto</td>
+                            <td class="px-4 py-3">テーマ（light/dark/auto）</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-mono text-blue-600">layout</td>
+                            <td class="px-4 py-3">grid</td>
+                            <td class="px-4 py-3">レイアウト（grid/column）</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-mono text-blue-600">maxColumns</td>
+                            <td class="px-4 py-3">3</td>
+                            <td class="px-4 py-3">最大カラム数（1-5）</td>
+                        </tr>
+                        <tr>
+                            <td class="px-4 py-3 font-mono text-blue-600">refreshInterval</td>
+                            <td class="px-4 py-3">30000</td>
+                            <td class="px-4 py-3">自動更新間隔（ミリ秒、0で無効）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <!-- XBoard埋め込みスクリプト（実際の本番環境では別ドメインから読み込み） -->
+    <script src="/xboard-embed.js"></script>
+    
+    <script>
+        // デモ用の初期化
+        XBoard.create('#xboard-basic', {
+            accounts: 'elonmusk,twitter',
+            limit: 4
+        });
+
+        XBoard.create('#xboard-dark', {
+            accounts: 'twitter',
+            limit: 2,
+            theme: 'dark',
+            maxColumns: 2
+        });
+
+        XBoard.create('#xboard-custom', {
+            accounts: 'elonmusk,twitter',
+            limit: 6,
+            theme: 'auto',
+            layout: 'grid',
+            maxColumns: 3,
+            refreshInterval: 60000
+        });
+    </script>
+</body>
+</html>

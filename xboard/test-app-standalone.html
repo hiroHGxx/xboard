@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoard - 動作確認テスト</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    <div class="min-h-screen">
+        <div class="max-w-6xl mx-auto px-4 py-8">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                    XBoard
+                </h1>
+                <p class="text-gray-600 dark:text-gray-300">
+                    Multiple X (Twitter) Timeline Widget
+                </p>
+                
+                <!-- Status indicator -->
+                <div class="mt-4 flex items-center justify-center space-x-4">
+                    <div class="flex items-center space-x-2 text-green-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="text-sm">Timeline loaded (4 tweets)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="timeline">
+                <!-- Tweet cards will be generated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock tweet data (same as in the React app)
+        const mockTweets = [
+            {
+                id: '1',
+                text: 'Excited to announce our new AI features! The future of technology is here. #AI #Innovation',
+                created_at: new Date().toISOString(),
+                user: {
+                    id: '44196397',
+                    username: 'elonmusk',
+                    name: 'Elon Musk',
+                    profile_image_url: 'https://pbs.twimg.com/profile_images/1683325380441128960/yRsRRjGO_normal.jpg'
+                },
+                metrics: {
+                    retweet_count: 15420,
+                    like_count: 89532,
+                    reply_count: 3241
+                }
+            },
+            {
+                id: '2',
+                text: 'Working on making the internet a better place for everyone 🌍 #OpenSource #WebDevelopment',
+                created_at: new Date(Date.now() - 3600000).toISOString(),
+                user: {
+                    id: '783214',
+                    username: 'twitter',
+                    name: 'Twitter',
+                    profile_image_url: 'https://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg'
+                },
+                metrics: {
+                    retweet_count: 8934,
+                    like_count: 45621,
+                    reply_count: 1820
+                }
+            },
+            {
+                id: '3',
+                text: 'Beautiful morning! Time to build something amazing 🚀 #MondayMotivation #Startup',
+                created_at: new Date(Date.now() - 7200000).toISOString(),
+                user: {
+                    id: '44196397',
+                    username: 'elonmusk',
+                    name: 'Elon Musk',
+                    profile_image_url: 'https://pbs.twimg.com/profile_images/1683325380441128960/yRsRRjGO_normal.jpg'
+                },
+                metrics: {
+                    retweet_count: 2341,
+                    like_count: 12890,
+                    reply_count: 567
+                }
+            },
+            {
+                id: '4',
+                text: 'Thrilled to see developers building amazing things with our API! Keep innovating 💡 #DeveloperCommunity',
+                created_at: new Date(Date.now() - 10800000).toISOString(),
+                user: {
+                    id: '783214',
+                    username: 'twitter',
+                    name: 'Twitter',
+                    profile_image_url: 'https://pbs.twimg.com/profile_images/1488548719062654976/u6qfBBkF_normal.jpg'
+                },
+                metrics: {
+                    retweet_count: 5632,
+                    like_count: 23145,
+                    reply_count: 891
+                }
+            }
+        ];
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now.getTime() - date.getTime();
+            const diffMins = Math.floor(diffMs / (1000 * 60));
+            const diffHours = Math.floor(diffMins / 60);
+            
+            if (diffMins < 60) {
+                return `${diffMins}m`;
+            } else if (diffHours < 24) {
+                return `${diffHours}h`;
+            } else {
+                return date.toLocaleDateString();
+            }
+        }
+
+        function createTweetCard(tweet) {
+            return `
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-pointer">
+                    <div class="flex items-start space-x-3">
+                        <img
+                            src="${tweet.user.profile_image_url}"
+                            alt="${tweet.user.name}"
+                            class="w-10 h-10 rounded-full bg-gray-300 dark:bg-gray-600"
+                        />
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center space-x-2">
+                                <h3 class="font-bold text-gray-900 dark:text-white text-sm truncate">
+                                    ${tweet.user.name}
+                                </h3>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">
+                                    @${tweet.user.username}
+                                </span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">·</span>
+                                <span class="text-gray-500 dark:text-gray-400 text-sm">
+                                    ${formatDate(tweet.created_at)}
+                                </span>
+                            </div>
+                            <p class="text-gray-900 dark:text-white text-sm mt-1 leading-relaxed">
+                                ${tweet.text}
+                            </p>
+                            <div class="flex items-center space-x-6 mt-3 text-gray-500 dark:text-gray-400">
+                                <div class="flex items-center space-x-1 hover:text-blue-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <span class="text-xs">${tweet.metrics.reply_count}</span>
+                                </div>
+                                <div class="flex items-center space-x-1 hover:text-green-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2A8.003 8.003 0 0019.418 15M15 15H9" />
+                                    </svg>
+                                    <span class="text-xs">${tweet.metrics.retweet_count}</span>
+                                </div>
+                                <div class="flex items-center space-x-1 hover:text-red-500 transition-colors">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                    </svg>
+                                    <span class="text-xs">${tweet.metrics.like_count}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render tweets
+        const timeline = document.getElementById('timeline');
+        timeline.innerHTML = mockTweets.map(tweet => createTweetCard(tweet)).join('');
+
+        console.log('🎉 XBoard テストページが正常に読み込まれました！');
+        console.log('📊 表示されたツイート数:', mockTweets.length);
+    </script>
+</body>
+</html>

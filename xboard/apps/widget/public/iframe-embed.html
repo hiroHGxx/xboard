@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoard iframe 埋め込み</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* iframe用の最小化スタイル */
+        .iframe-container {
+            width: 100%;
+            overflow: hidden;
+        }
+    </style>
+</head>
+<body>
+    <div class="iframe-container">
+        <!-- XBoard コンテナ -->
+        <div id="xboard-iframe-content"></div>
+    </div>
+
+    <!-- XBoard埋め込みスクリプト -->
+    <script src="/xboard-embed.js"></script>
+    
+    <script>
+        // URLパラメータから設定を読み取り
+        const urlParams = new URLSearchParams(window.location.search);
+        const options = {
+            accounts: urlParams.get('accounts') || 'elonmusk,twitter',
+            limit: parseInt(urlParams.get('limit')) || 6,
+            theme: urlParams.get('theme') || 'auto',
+            layout: urlParams.get('layout') || 'grid',
+            maxColumns: parseInt(urlParams.get('maxColumns')) || 2,
+            refreshInterval: parseInt(urlParams.get('refreshInterval')) || 30000
+        };
+
+        // XBoardウィジェット初期化
+        const widget = XBoard.create('#xboard-iframe-content', options);
+
+        // iframe自動リサイズ機能
+        function resizeIframe() {
+            const height = Math.max(
+                document.body.scrollHeight,
+                document.body.offsetHeight,
+                document.documentElement.clientHeight,
+                document.documentElement.scrollHeight,
+                document.documentElement.offsetHeight
+            );
+            
+            // 親ウィンドウにサイズ変更を通知
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'xboard-resize',
+                    height: height,
+                    width: document.body.scrollWidth
+                }, '*');
+            }
+        }
+
+        // 初期リサイズ
+        setTimeout(resizeIframe, 100);
+
+        // 定期的なリサイズチェック
+        setInterval(resizeIframe, 1000);
+
+        // ResizeObserver対応ブラウザでは監視
+        if (typeof ResizeObserver !== 'undefined') {
+            const resizeObserver = new ResizeObserver(entries => {
+                resizeIframe();
+            });
+            resizeObserver.observe(document.body);
+        }
+
+        // ウィンドウリサイズ時
+        window.addEventListener('resize', resizeIframe);
+
+        // DOM変更時（ツイート読み込み完了時など）
+        const targetNode = document.getElementById('xboard-iframe-content');
+        if (targetNode) {
+            const observer = new MutationObserver(function(mutations) {
+                setTimeout(resizeIframe, 50);
+            });
+            
+            observer.observe(targetNode, { 
+                childList: true, 
+                subtree: true,
+                attributes: true,
+                attributeFilter: ['style', 'class']
+            });
+        }
+
+        // メッセージ受信（親フレームからの制御）
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'xboard-update-options') {
+                widget.updateOptions(event.data.options);
+                setTimeout(resizeIframe, 100);
+            } else if (event.data.type === 'xboard-refresh') {
+                widget.refresh();
+                setTimeout(resizeIframe, 100);
+            }
+        });
+
+        // 読み込み完了を親に通知
+        window.addEventListener('load', function() {
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'xboard-loaded'
+                }, '*');
+            }
+            setTimeout(resizeIframe, 200);
+        });
+
+        console.log('XBoard iframe initialized with options:', options);
+    </script>
+</body>
+</html>

@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoard iframe 埋め込みデモ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+            XBoard iframe 埋め込みデモ
+        </h1>
+        
+        <!-- 基本的なiframe埋め込み -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">1. JavaScript APIでの埋め込み</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div id="iframe-basic"></div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;div id="iframe-basic"&gt;&lt;/div&gt;
+&lt;script src="/iframe-helper.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+  XBoardIframe.create('#iframe-basic', {
+    accounts: 'elonmusk,twitter',
+    limit: 4,
+    theme: 'light'
+  });
+&lt;/script&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- データ属性での自動初期化 -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">2. データ属性での自動初期化</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div data-xboard-iframe 
+                     data-accounts="twitter" 
+                     data-limit="3" 
+                     data-theme="auto"
+                     data-layout="column">
+                </div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;div data-xboard-iframe 
+     data-accounts="twitter" 
+     data-limit="3" 
+     data-theme="auto"
+     data-layout="column"&gt;
+&lt;/div&gt;
+&lt;script src="/iframe-helper.js"&gt;&lt;/script&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- カスタム制御 -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">3. カスタム制御</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div class="mb-4 space-x-2">
+                    <button id="refresh-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        更新
+                    </button>
+                    <button id="change-accounts-btn" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        アカウント変更
+                    </button>
+                    <button id="toggle-theme-btn" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                        テーマ切替
+                    </button>
+                </div>
+                <div id="iframe-custom"></div>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>const widget = XBoardIframe.create('#iframe-custom', {
+  accounts: 'elonmusk',
+  limit: 3
+});
+
+// 手動更新
+document.getElementById('refresh-btn').onclick = () => {
+  widget.refresh();
+};
+
+// オプション変更
+document.getElementById('change-accounts-btn').onclick = () => {
+  widget.updateOptions({
+    accounts: 'elonmusk,twitter'
+  });
+};</code></pre>
+            </details>
+        </section>
+
+        <!-- 手動iframe -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">4. 手動iframe（JavaScriptなし）</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <iframe 
+                    src="/iframe-embed.html?accounts=elonmusk&limit=3&theme=light&layout=grid&maxColumns=2"
+                    style="width: 100%; height: 400px; border: none;"
+                    title="XBoard Timeline Widget">
+                </iframe>
+            </div>
+            <details class="mt-4">
+                <summary class="cursor-pointer text-blue-600 hover:text-blue-800">コードを表示</summary>
+                <pre class="bg-gray-100 p-4 rounded mt-2 text-sm overflow-x-auto"><code>&lt;iframe 
+    src="/iframe-embed.html?accounts=elonmusk&amp;limit=3&amp;theme=light"
+    style="width: 100%; height: 400px; border: none;"
+    title="XBoard Timeline Widget"&gt;
+&lt;/iframe&gt;</code></pre>
+            </details>
+        </section>
+
+        <!-- 利点と使い分け -->
+        <section class="mb-12 bg-blue-50 p-6 rounded-lg">
+            <h2 class="text-xl font-semibold text-blue-900 mb-4">📊 iframe vs script タグ比較</h2>
+            <div class="grid md:grid-cols-2 gap-6 text-blue-800">
+                <div>
+                    <h3 class="font-semibold mb-2">🛡️ iframe埋め込みの利点</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li>• CSS競合の完全回避</li>
+                        <li>• セキュリティ分離</li>
+                        <li>• 既存サイトに安全に埋め込める</li>
+                        <li>• JavaScriptライブラリとの競合なし</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="font-semibold mb-2">⚡ script タグの利点</h3>
+                    <ul class="space-y-1 text-sm">
+                        <li>• より高速な読み込み</li>
+                        <li>• 親ページとの統合性</li>
+                        <li>• カスタマイズ性が高い</li>
+                        <li>• SEO対応が容易</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- リサイズイベント監視 -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">🔄 リサイズイベント監視</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div class="mb-4">
+                    <div id="resize-info" class="text-sm text-gray-600 p-3 bg-gray-50 rounded">
+                        リサイズ情報がここに表示されます
+                    </div>
+                </div>
+                <div id="iframe-resize-demo"></div>
+            </div>
+        </section>
+    </div>
+
+    <!-- XBoard iframe ヘルパー -->
+    <script src="/iframe-helper.js"></script>
+    
+    <script>
+        // 基本iframe
+        const basicWidget = XBoardIframe.create('#iframe-basic', {
+            accounts: 'elonmusk,twitter',
+            limit: 4,
+            theme: 'light'
+        });
+
+        // カスタム制御iframe
+        const customWidget = XBoardIframe.create('#iframe-custom', {
+            accounts: 'elonmusk',
+            limit: 3,
+            theme: 'light'
+        });
+
+        // リサイズデモ
+        const resizeWidget = XBoardIframe.create('#iframe-resize-demo', {
+            accounts: 'twitter',
+            limit: 2,
+            theme: 'auto'
+        });
+
+        // 制御ボタン
+        document.getElementById('refresh-btn').onclick = () => {
+            customWidget.refresh();
+        };
+
+        let currentTheme = 'light';
+        document.getElementById('toggle-theme-btn').onclick = () => {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            customWidget.updateOptions({ theme: currentTheme });
+        };
+
+        let currentAccounts = 'elonmusk';
+        document.getElementById('change-accounts-btn').onclick = () => {
+            currentAccounts = currentAccounts === 'elonmusk' ? 'elonmusk,twitter' : 'elonmusk';
+            customWidget.updateOptions({ accounts: currentAccounts });
+        };
+
+        // リサイズイベント監視
+        let resizeCount = 0;
+        window.addEventListener('xboard-resized', (event) => {
+            resizeCount++;
+            const info = document.getElementById('resize-info');
+            info.innerHTML = `
+                <strong>リサイズ ${resizeCount}回目</strong><br>
+                幅: ${event.detail.width}px<br>
+                高さ: ${event.detail.height}px<br>
+                時刻: ${new Date().toLocaleTimeString()}
+            `;
+        });
+
+        // 読み込み完了イベント監視
+        window.addEventListener('xboard-loaded', (event) => {
+            console.log('XBoard iframe loaded:', event.detail.iframe);
+        });
+    </script>
+</body>
+</html>

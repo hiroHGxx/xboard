@@ -29,6 +29,9 @@ importers:
 
   apps/widget:
     dependencies:
+      '@tanstack/react-query':
+        specifier: ^5.80.7
+        version: 5.80.7(react@18.3.1)
       react:
         specifier: ^18.2.0
         version: 18.3.1
@@ -79,7 +82,7 @@ importers:
   packages/api:
     dependencies:
       '@netlify/blobs':
-        specifier: ^7.0.0
+        specifier: ^7.4.0
         version: 7.4.0
       '@netlify/functions':
         specifier: ^2.4.1
@@ -998,6 +1001,19 @@ packages:
     requiresBuild: true
     dev: true
     optional: true
+
+  /@tanstack/query-core@5.80.7:
+    resolution: {integrity: sha512-s09l5zeUKC8q7DCCCIkVSns8zZrK4ZDT6ryEjxNBFi68G4z2EBobBS7rdOY3r6W1WbUDpc1fe5oY+YO/+2UVUg==}
+    dev: false
+
+  /@tanstack/react-query@5.80.7(react@18.3.1):
+    resolution: {integrity: sha512-u2F0VK6+anItoEvB3+rfvTO9GEh2vb00Je05OwlUe/A0lkJBgW1HckiY3f9YZa+jx6IOe4dHPh10dyp9aY3iRQ==}
+    peerDependencies:
+      react: ^18 || ^19
+    dependencies:
+      '@tanstack/query-core': 5.80.7
+      react: 18.3.1
+    dev: false
 
   /@types/babel__core@7.20.5:
     resolution: {integrity: sha512-qoQprZvz5wQFJwMDqeseRXWv3rqMvhgpbXFfVyWhbx9X47POIA6i/+dXefEmZKoAgOaTdaIgNSMqMIU61yRyzA==}

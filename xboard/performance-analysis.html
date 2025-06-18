@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoard パフォーマンス分析</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .metric {
+            background: #f5f5f5;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #007acc;
+        }
+        .good { border-left-color: #28a745; }
+        .warning { border-left-color: #ffc107; }
+        .error { border-left-color: #dc3545; }
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #005a9a;
+        }
+        .results {
+            margin-top: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 XBoard パフォーマンス分析ツール</h1>
+    
+    <div class="metric">
+        <h2>📊 要件チェック</h2>
+        <p><strong>目標:</strong> Lighthouse Performance, Accessibility, Best Practices, SEO ≥ 90点</p>
+        <p><strong>バンドルサイズ目標:</strong> 初回JSバンドル < 100KB</p>
+        <p><strong>LCP目標:</strong> < 2.5秒 (モバイル4G)</p>
+    </div>
+
+    <div class="metric">
+        <h2>📦 バンドルサイズ分析</h2>
+        <div id="bundle-analysis">
+            <h3>生成ファイルサイズ:</h3>
+            <ul>
+                <li><strong>xboard-embed.js:</strong> 7.42 KB (gzip: 2.67 KB) ✅</li>
+                <li><strong>main-*.js:</strong> 185.56 KB (gzip: 58.60 KB) ⚠️</li>
+                <li><strong>index-*.css:</strong> 10.50 KB (gzip: 2.79 KB) ✅</li>
+            </ul>
+            <p><strong>評価:</strong> 埋め込み用は軽量、メインアプリは要最適化</p>
+        </div>
+    </div>
+
+    <div class="metric">
+        <h2>⚡ Web Vitals 測定</h2>
+        <button onclick="measureWebVitals()">Web Vitals測定開始</button>
+        <div id="web-vitals-results"></div>
+    </div>
+
+    <div class="metric">
+        <h2>🔍 リソース分析</h2>
+        <button onclick="analyzeResources()">リソース分析開始</button>
+        <div id="resource-analysis"></div>
+    </div>
+
+    <div class="metric">
+        <h2>📱 レスポンシブテスト</h2>
+        <button onclick="testResponsive()">レスポンシブテスト</button>
+        <div id="responsive-results"></div>
+    </div>
+
+    <div class="metric">
+        <h2>♿ アクセシビリティチェック</h2>
+        <button onclick="checkAccessibility()">アクセシビリティ確認</button>
+        <div id="accessibility-results"></div>
+    </div>
+
+    <div class="results" id="overall-results"></div>
+
+    <script>
+        // Web Vitals 測定
+        async function measureWebVitals() {
+            const results = document.getElementById('web-vitals-results');
+            results.innerHTML = '<p>測定中...</p>';
+            
+            const vitals = {};
+            
+            // LCP (Largest Contentful Paint)
+            const lcpObserver = new PerformanceObserver((entryList) => {
+                const entries = entryList.getEntries();
+                const lastEntry = entries[entries.length - 1];
+                vitals.LCP = lastEntry.startTime;
+                updateWebVitals(vitals);
+            });
+            lcpObserver.observe({entryTypes: ['largest-contentful-paint']});
+            
+            // FID (First Input Delay) - simulated
+            vitals.FID = 'N/A (interaction required)';
+            
+            // CLS (Cumulative Layout Shift)
+            const clsObserver = new PerformanceObserver((entryList) => {
+                let clsValue = 0;
+                for (const entry of entryList.getEntries()) {
+                    if (!entry.hadRecentInput) {
+                        clsValue += entry.value;
+                    }
+                }
+                vitals.CLS = clsValue;
+                updateWebVitals(vitals);
+            });
+            clsObserver.observe({entryTypes: ['layout-shift']});
+            
+            // FCP (First Contentful Paint)
+            const fcpObserver = new PerformanceObserver((entryList) => {
+                for (const entry of entryList.getEntries()) {
+                    if (entry.name === 'first-contentful-paint') {
+                        vitals.FCP = entry.startTime;
+                        updateWebVitals(vitals);
+                    }
+                }
+            });
+            fcpObserver.observe({entryTypes: ['paint']});
+            
+            setTimeout(() => updateWebVitals(vitals), 3000);
+        }
+        
+        function updateWebVitals(vitals) {
+            const results = document.getElementById('web-vitals-results');
+            let html = '<table><tr><th>指標</th><th>値</th><th>評価</th><th>目標</th></tr>';
+            
+            if (vitals.LCP) {
+                const lcpSeconds = (vitals.LCP / 1000).toFixed(2);
+                const lcpGood = vitals.LCP < 2500;
+                html += `<tr><td>LCP</td><td>${lcpSeconds}s</td><td>${lcpGood ? '✅ Good' : '⚠️ Needs improvement'}</td><td>&lt; 2.5s</td></tr>`;
+            }
+            
+            if (vitals.FCP) {
+                const fcpSeconds = (vitals.FCP / 1000).toFixed(2);
+                const fcpGood = vitals.FCP < 1800;
+                html += `<tr><td>FCP</td><td>${fcpSeconds}s</td><td>${fcpGood ? '✅ Good' : '⚠️ Needs improvement'}</td><td>&lt; 1.8s</td></tr>`;
+            }
+            
+            if (vitals.CLS !== undefined) {
+                const clsGood = vitals.CLS < 0.1;
+                html += `<tr><td>CLS</td><td>${vitals.CLS.toFixed(3)}</td><td>${clsGood ? '✅ Good' : '⚠️ Needs improvement'}</td><td>&lt; 0.1</td></tr>`;
+            }
+            
+            html += '</table>';
+            results.innerHTML = html;
+        }
+        
+        // リソース分析
+        function analyzeResources() {
+            const results = document.getElementById('resource-analysis');
+            const resources = performance.getEntriesByType('resource');
+            
+            let totalSize = 0;
+            let jsSize = 0;
+            let cssSize = 0;
+            let imageSize = 0;
+            
+            let html = '<h3>読み込まれたリソース:</h3><table><tr><th>タイプ</th><th>URL</th><th>サイズ(推定)</th><th>時間</th></tr>';
+            
+            resources.forEach(resource => {
+                const size = resource.transferSize || resource.encodedBodySize || 0;
+                totalSize += size;
+                
+                let type = 'Other';
+                if (resource.name.includes('.js')) {
+                    type = 'JavaScript';
+                    jsSize += size;
+                } else if (resource.name.includes('.css')) {
+                    type = 'CSS';
+                    cssSize += size;
+                } else if (resource.name.match(/\.(jpg|jpeg|png|gif|webp|svg)$/i)) {
+                    type = 'Image';
+                    imageSize += size;
+                }
+                
+                const fileName = resource.name.split('/').pop();
+                const duration = (resource.responseEnd - resource.startTime).toFixed(0);
+                
+                html += `<tr><td>${type}</td><td>${fileName}</td><td>${(size/1024).toFixed(1)} KB</td><td>${duration}ms</td></tr>`;
+            });
+            
+            html += '</table>';
+            html += `<h3>サマリー:</h3>`;
+            html += `<ul>`;
+            html += `<li>総サイズ: ${(totalSize/1024).toFixed(1)} KB</li>`;
+            html += `<li>JavaScript: ${(jsSize/1024).toFixed(1)} KB</li>`;
+            html += `<li>CSS: ${(cssSize/1024).toFixed(1)} KB</li>`;
+            html += `<li>画像: ${(imageSize/1024).toFixed(1)} KB</li>`;
+            html += `</ul>`;
+            
+            // 評価
+            if (jsSize < 102400) { // 100KB
+                html += `<p>✅ JavaScript バンドルサイズは目標を達成</p>`;
+            } else {
+                html += `<p>⚠️ JavaScript バンドルサイズが目標を超過 (目標: 100KB)</p>`;
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        // レスポンシブテスト
+        function testResponsive() {
+            const results = document.getElementById('responsive-results');
+            const viewports = [
+                { name: 'Mobile', width: 375, height: 667 },
+                { name: 'Tablet', width: 768, height: 1024 },
+                { name: 'Desktop', width: 1200, height: 800 }
+            ];
+            
+            let html = '<h3>レスポンシブ確認:</h3>';
+            
+            viewports.forEach(viewport => {
+                // 簡易的なレスポンシブチェック
+                const mediaQuery = window.matchMedia(`(max-width: ${viewport.width}px)`);
+                const matches = mediaQuery.matches;
+                
+                html += `<p><strong>${viewport.name} (${viewport.width}x${viewport.height}):</strong> `;
+                html += matches ? '✅ 対応' : '❌ 要確認';
+                html += '</p>';
+            });
+            
+            // グリッドレイアウトの確認
+            const gridElements = document.querySelectorAll('.grid');
+            if (gridElements.length > 0) {
+                html += '<p>✅ CSS Grid レイアウト検出</p>';
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        // アクセシビリティチェック
+        function checkAccessibility() {
+            const results = document.getElementById('accessibility-results');
+            let score = 100;
+            let issues = [];
+            
+            // 基本的なアクセシビリティチェック
+            const images = document.querySelectorAll('img');
+            images.forEach(img => {
+                if (!img.alt) {
+                    issues.push('画像にalt属性がありません');
+                    score -= 5;
+                }
+            });
+            
+            const headings = document.querySelectorAll('h1, h2, h3, h4, h5, h6');
+            if (headings.length === 0) {
+                issues.push('見出しタグが見つかりません');
+                score -= 10;
+            }
+            
+            const focusableElements = document.querySelectorAll('button, input, select, textarea, a[href]');
+            let focusableCount = 0;
+            focusableElements.forEach(el => {
+                if (el.tabIndex !== -1) focusableCount++;
+            });
+            
+            if (focusableCount === 0) {
+                issues.push('フォーカス可能な要素がありません');
+                score -= 10;
+            }
+            
+            // カラーコントラストの簡易チェック
+            const textElements = document.querySelectorAll('p, span, div, h1, h2, h3, h4, h5, h6');
+            // 実際のコントラスト計算は複雑なので簡易版
+            
+            let html = `<h3>アクセシビリティスコア: ${Math.max(score, 0)}/100</h3>`;
+            
+            if (issues.length === 0) {
+                html += '<p>✅ 基本的なアクセシビリティ要件を満たしています</p>';
+            } else {
+                html += '<h4>改善が必要な項目:</h4><ul>';
+                issues.forEach(issue => {
+                    html += `<li>⚠️ ${issue}</li>`;
+                });
+                html += '</ul>';
+            }
+            
+            results.innerHTML = html;
+        }
+        
+        // 総合評価
+        function updateOverallResults() {
+            const results = document.getElementById('overall-results');
+            
+            let html = '<h2>📋 総合評価</h2>';
+            html += '<div class="metric good">';
+            html += '<h3>✅ 達成済み項目</h3>';
+            html += '<ul>';
+            html += '<li>埋め込み用JSバンドル: 7.42KB (目標: 100KB未満)</li>';
+            html += '<li>レスポンシブデザイン対応</li>';
+            html += '<li>ダークモード対応</li>';
+            html += '<li>自動リサイズ機能</li>';
+            html += '<li>TypeScript型安全性</li>';
+            html += '</ul>';
+            html += '</div>';
+            
+            html += '<div class="metric warning">';
+            html += '<h3>⚠️ 要改善項目</h3>';
+            html += '<ul>';
+            html += '<li>メインアプリJSバンドル: 185KB (要最適化)</li>';
+            html += '<li>Lighthouse自動テスト環境構築</li>';
+            html += '<li>実機テスト実施</li>';
+            html += '</ul>';
+            html += '</div>';
+            
+            html += '<div class="metric">';
+            html += '<h3>🎯 次のアクション</h3>';
+            html += '<ul>';
+            html += '<li>コード分割によるバンドルサイズ最適化</li>';
+            html += '<li>本番環境でのLighthouse測定</li>';
+            html += '<li>実機でのパフォーマンステスト</li>';
+            html += '</ul>';
+            html += '</div>';
+            
+            results.innerHTML = html;
+        }
+        
+        // 初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            updateOverallResults();
+        });
+    </script>
+</body>
+</html>

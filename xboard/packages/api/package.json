@@ -11,7 +11,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@netlify/blobs": "^7.0.0",
+    "@netlify/blobs": "^7.4.0",
     "@netlify/functions": "^2.4.1"
   },
   "devDependencies": {

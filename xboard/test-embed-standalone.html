@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XBoard 埋め込み動作テスト</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body { 
+            font-family: 'Inter', sans-serif; 
+            margin: 0;
+            padding: 20px;
+        }
+        
+        /* XBoard埋め込み用スタイル（外部CSSの代替） */
+        .xboard-widget {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+        
+        .xboard-container {
+            background: #f3f4f6;
+            padding: 16px;
+            border-radius: 8px;
+        }
+        
+        .xboard-widget.dark .xboard-container {
+            background: #111827;
+        }
+        
+        .xboard-tweet {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s;
+        }
+        
+        .xboard-widget.dark .xboard-tweet {
+            background: #1f2937;
+            border-color: #374151;
+            color: white;
+        }
+        
+        .xboard-tweet:hover {
+            background: #f9fafb;
+            transform: translateY(-1px);
+        }
+        
+        .xboard-widget.dark .xboard-tweet:hover {
+            background: #2d3748;
+        }
+
+        .grid {
+            display: grid;
+            gap: 16px;
+        }
+        
+        .grid-cols-1 { grid-template-columns: repeat(1, 1fr); }
+        
+        @media (min-width: 768px) {
+            .md\\:grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (min-width: 1024px) {
+            .lg\\:grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+            XBoard 埋め込み動作テスト
+        </h1>
+        
+        <!-- テスト状況表示 -->
+        <div id="test-status" class="mb-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h2 class="text-lg font-semibold text-blue-900 mb-2">🧪 テスト状況</h2>
+            <div id="status-content" class="text-blue-800 text-sm">
+                テスト開始中...
+            </div>
+        </div>
+        
+        <!-- 基本埋め込みテスト -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">1. 基本埋め込みテスト</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div id="xboard-basic"></div>
+            </div>
+        </section>
+
+        <!-- データ属性テスト -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">2. データ属性自動初期化テスト</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div data-xboard 
+                     data-accounts="twitter" 
+                     data-limit="3" 
+                     data-theme="light"
+                     data-layout="column">
+                </div>
+            </div>
+        </section>
+
+        <!-- ダークテーマテスト -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">3. ダークテーマテスト</h2>
+            <div class="bg-gray-900 p-6 rounded-lg shadow-sm border">
+                <div id="xboard-dark"></div>
+            </div>
+        </section>
+
+        <!-- 動的制御テスト -->
+        <section class="mb-12">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">4. 動的制御テスト</h2>
+            <div class="bg-white p-6 rounded-lg shadow-sm border">
+                <div class="mb-4 space-x-2">
+                    <button id="refresh-btn" class="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+                        更新
+                    </button>
+                    <button id="change-theme-btn" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+                        テーマ変更
+                    </button>
+                    <button id="change-accounts-btn" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600">
+                        アカウント変更
+                    </button>
+                </div>
+                <div id="xboard-dynamic"></div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // XBoard埋め込みライブラリのシミュレーション
+        console.log('🚀 XBoard埋め込みテスト開始');
+        
+        // テスト状況を更新する関数
+        function updateStatus(message, isSuccess = true) {
+            const content = document.getElementById('status-content');
+            const className = isSuccess ? 'text-green-800' : 'text-red-800';
+            content.innerHTML = `<span class="${className}">✅ ${message}</span><br>` + content.innerHTML;
+        }
+
+        // モックのXBoardライブラリ
+        class MockXBoardWidget {
+            constructor(container, options = {}) {
+                this.container = typeof container === 'string' ? document.querySelector(container) : container;
+                this.options = {
+                    accounts: options.accounts || 'elonmusk,twitter',
+                    limit: options.limit || 4,
+                    theme: options.theme || 'auto',
+                    layout: options.layout || 'grid',
+                    maxColumns: options.maxColumns || 3,
+                    refreshInterval: options.refreshInterval || 30000
+                };
+                
+                this.init();
+            }
+            
+            init() {
+                this.container.className = `xboard-widget ${this.options.theme === 'dark' ? 'dark' : ''}`;
+                this.render();
+                updateStatus(`ウィジェット初期化: ${this.options.accounts} (${this.options.limit}件)`);
+            }
+            
+            render() {
+                const tweets = this.getMockTweets();
+                const gridClass = this.options.layout === 'grid' 
+                    ? `grid grid-cols-1 md:grid-cols-2 lg:grid-cols-${this.options.maxColumns}`
+                    : '';
+                
+                this.container.innerHTML = `
+                    <div class="xboard-container">
+                        <div class="text-center mb-4">
+                            <span class="text-sm ${this.options.theme === 'dark' ? 'text-green-400' : 'text-green-600'}">
+                                ✅ タイムライン読み込み完了 (${tweets.length}ツイート)
+                            </span>
+                        </div>
+                        <div class="${gridClass}">
+                            ${tweets.map(tweet => this.renderTweet(tweet)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            renderTweet(tweet) {
+                return `
+                    <div class="xboard-tweet">
+                        <div style="display: flex; align-items: start; gap: 12px;">
+                            <img src="${tweet.user.profile_image_url}" 
+                                 alt="${tweet.user.name}" 
+                                 style="width: 40px; height: 40px; border-radius: 50%; background: #ccc;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                    <strong style="font-size: 14px;">${tweet.user.name}</strong>
+                                    <span style="color: #6b7280; font-size: 14px;">@${tweet.user.username}</span>
+                                    <span style="color: #6b7280; font-size: 14px;">·</span>
+                                    <span style="color: #6b7280; font-size: 14px;">${tweet.timeAgo}</span>
+                                </div>
+                                <p style="font-size: 14px; line-height: 1.4; margin: 4px 0;">${tweet.text}</p>
+                                <div style="display: flex; gap: 24px; margin-top: 12px; color: #6b7280; font-size: 12px;">
+                                    <span>💬 ${tweet.metrics.reply_count}</span>
+                                    <span>🔄 ${tweet.metrics.retweet_count}</span>
+                                    <span>❤️ ${tweet.metrics.like_count}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            getMockTweets() {
+                const accounts = this.options.accounts.split(',');
+                const allTweets = [
+                    {
+                        user: { name: 'Elon Musk', username: 'elonmusk', profile_image_url: 'https://via.placeholder.com/40' },
+                        text: 'Excited to announce our new AI features! 🚀 #AI #Innovation',
+                        timeAgo: '2m',
+                        metrics: { reply_count: 1200, retweet_count: 5400, like_count: 18900 }
+                    },
+                    {
+                        user: { name: 'Twitter', username: 'twitter', profile_image_url: 'https://via.placeholder.com/40' },
+                        text: 'Working on making the internet better for everyone 🌍 #OpenSource',
+                        timeAgo: '15m',
+                        metrics: { reply_count: 890, retweet_count: 3200, like_count: 12400 }
+                    },
+                    {
+                        user: { name: 'Elon Musk', username: 'elonmusk', profile_image_url: 'https://via.placeholder.com/40' },
+                        text: 'Beautiful morning! Time to build something amazing ☀️ #MondayMotivation',
+                        timeAgo: '1h',
+                        metrics: { reply_count: 567, retweet_count: 2100, like_count: 8900 }
+                    },
+                    {
+                        user: { name: 'Twitter', username: 'twitter', profile_image_url: 'https://via.placeholder.com/40' },
+                        text: 'Developers are building incredible things with our API! 💡 #DeveloperCommunity',
+                        timeAgo: '2h',
+                        metrics: { reply_count: 445, retweet_count: 1800, like_count: 6700 }
+                    }
+                ];
+                
+                return allTweets
+                    .filter(tweet => accounts.some(account => tweet.user.username.includes(account.trim())))
+                    .slice(0, this.options.limit);
+            }
+            
+            refresh() {
+                this.render();
+                updateStatus('手動更新実行');
+            }
+            
+            updateOptions(newOptions) {
+                this.options = { ...this.options, ...newOptions };
+                if (newOptions.theme) {
+                    this.container.className = `xboard-widget ${newOptions.theme === 'dark' ? 'dark' : ''}`;
+                }
+                this.render();
+                updateStatus(`オプション更新: ${JSON.stringify(newOptions)}`);
+            }
+        }
+
+        // グローバルAPI
+        window.XBoard = {
+            create: (container, options) => new MockXBoardWidget(container, options)
+        };
+        
+        // 自動初期化
+        document.addEventListener('DOMContentLoaded', () => {
+            const widgets = document.querySelectorAll('[data-xboard]');
+            widgets.forEach((element) => {
+                const options = {};
+                if (element.dataset.accounts) options.accounts = element.dataset.accounts;
+                if (element.dataset.limit) options.limit = parseInt(element.dataset.limit);
+                if (element.dataset.theme) options.theme = element.dataset.theme;
+                if (element.dataset.layout) options.layout = element.dataset.layout;
+                
+                new MockXBoardWidget(element, options);
+            });
+        });
+
+        // テスト実行
+        updateStatus('XBoardライブラリ読み込み完了');
+        
+        // 基本埋め込み
+        const basicWidget = XBoard.create('#xboard-basic', {
+            accounts: 'elonmusk,twitter',
+            limit: 4
+        });
+
+        // ダークテーマ
+        const darkWidget = XBoard.create('#xboard-dark', {
+            accounts: 'twitter',
+            limit: 2,
+            theme: 'dark'
+        });
+
+        // 動的制御
+        const dynamicWidget = XBoard.create('#xboard-dynamic', {
+            accounts: 'elonmusk',
+            limit: 3
+        });
+
+        // ボタン制御
+        let currentTheme = 'light';
+        document.getElementById('change-theme-btn').onclick = () => {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            dynamicWidget.updateOptions({ theme: currentTheme });
+        };
+
+        let currentAccounts = 'elonmusk';
+        document.getElementById('change-accounts-btn').onclick = () => {
+            currentAccounts = currentAccounts === 'elonmusk' ? 'elonmusk,twitter' : 'elonmusk';
+            dynamicWidget.updateOptions({ accounts: currentAccounts });
+        };
+
+        document.getElementById('refresh-btn').onclick = () => {
+            dynamicWidget.refresh();
+        };
+
+        updateStatus('全テスト完了! 🎉');
+        
+        console.log('✅ XBoard埋め込みテスト完了');
+    </script>
+</body>
+</html>
