@@ -1,6 +1,10 @@
 [build]
-  command = "pnpm run build"
+  command = "cd apps/widget && pnpm install && pnpm run build"
   publish = "apps/widget/dist"
+
+[build.environment]
+  NODE_VERSION = "20"
+  PNPM_VERSION = "8"
 
 [functions]
   directory = "packages/api/netlify-functions"
