@@ -1,14 +1,14 @@
 [build]
   base = ""
-  command = "cd apps/widget && pnpm install && pnpm run build"
-  publish = "apps/widget/dist"
+  command = "cd xboard/apps/widget && pnpm install && pnpm run build"
+  publish = "xboard/apps/widget/dist"
 
 [build.environment]
   NODE_VERSION = "20"
   PNPM_VERSION = "8"
 
 [functions]
-  directory = "packages/api/netlify-functions"
+  directory = "xboard/packages/api/netlify-functions"
   node_bundler = "esbuild"
 
 [[headers]]
