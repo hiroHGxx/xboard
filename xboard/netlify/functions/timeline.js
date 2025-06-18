@@ -1,7 +1,4 @@
-// X API v2 Timeline Function for Netlify
-const { getStore } = require('@netlify/blobs');
-
-// X API v2 Base URL
+// X API v2 Timeline Function
 const X_API_BASE = 'https://api.twitter.com/2';
 
 // Helper function to get user IDs from usernames
@@ -195,7 +192,8 @@ const getMockTweets = (limit) => {
   ].slice(0, limit);
 };
 
-exports.handler = async (event) => {
+exports.handler = async (event, context) => {
+  // CORS headers
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -203,14 +201,12 @@ exports.handler = async (event) => {
     'Content-Type': 'application/json',
   };
 
+  // Handle preflight
   if (event.httpMethod === 'OPTIONS') {
-    return {
-      statusCode: 200,
-      headers,
-      body: '',
-    };
+    return { statusCode: 200, headers, body: '' };
   }
 
+  // Only allow GET
   if (event.httpMethod !== 'GET') {
     return {
       statusCode: 405,
@@ -220,7 +216,7 @@ exports.handler = async (event) => {
   }
 
   try {
-    const { accounts, limit = '20' } = event.queryStringParameters || {};
+    const { accounts, limit = '10' } = event.queryStringParameters || {};
     
     if (!accounts) {
       return {
@@ -230,78 +226,38 @@ exports.handler = async (event) => {
       };
     }
 
-    const limitNum = Math.min(parseInt(limit, 10), 50);
-    const accountList = accounts.split(',').map(id => id.trim());
+    console.log('Timeline API called with:', { accounts, limit });
+
+    const limitNum = Math.min(parseInt(limit, 10) || 10, 50);
+    const accountList = accounts.split(',').map(account => account.trim());
     
-    // Create cache key
-    const cacheKey = `timeline:${accountList.join(',')}:${limitNum}`;
-    
-    // Skip cache in local development
-    const isLocal = !process.env.NETLIFY;
-    
-    if (!isLocal) {
-      // Try to get from cache first
-      const store = getStore('timeline-cache');
-      try {
-        const cached = await store.get(cacheKey, { type: 'json' });
-        if (cached && cached.expires > Date.now()) {
-          console.log('Cache hit for', cacheKey);
-          return {
-            statusCode: 200,
-            headers: {
-              ...headers,
-              'Cache-Control': 'public, s-maxage=30',
-              'X-Cache': 'HIT',
-            },
-            body: JSON.stringify(cached.data),
-          };
-        }
-      } catch (cacheError) {
-        console.warn('Cache read error:', cacheError);
-      }
-    }
-    
-    // Fetch fresh data from X API
+    // Fetch tweets from X API
     const tweets = await getTweetsFromAPI(accountList, limitNum);
     
     const response = {
-      tweets,
+      tweets
     };
-    
-    // Cache the response for 30 seconds (only in production)
-    if (!isLocal) {
-      try {
-        const store = getStore('timeline-cache');
-        await store.set(cacheKey, {
-          data: response,
-          expires: Date.now() + 30000 // 30 seconds
-        }, {
-          metadata: {
-            accounts: accountList.join(','),
-            created: new Date().toISOString()
-          }
-        });
-        console.log('Cached response for', cacheKey);
-      } catch (cacheError) {
-        console.warn('Cache write error:', cacheError);
-      }
-    }
+
+    console.log(`Returning ${response.tweets.length} tweets`);
 
     return {
       statusCode: 200,
       headers: {
         ...headers,
         'Cache-Control': 'public, s-maxage=30',
-        'X-Cache': 'MISS',
       },
       body: JSON.stringify(response),
     };
+
   } catch (error) {
     console.error('Timeline API error:', error);
     return {
       statusCode: 500,
       headers,
-      body: JSON.stringify({ error: 'Internal server error' }),
+      body: JSON.stringify({ 
+        error: 'Internal server error',
+        message: error.message 
+      }),
     };
   }
 };
