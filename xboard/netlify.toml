@@ -1,5 +1,4 @@
 [build]
-  base = ""
   command = "cd xboard && pnpm install && cd apps/widget && pnpm run build"
   publish = "xboard/apps/widget/dist"
 
@@ -8,7 +7,7 @@
   PNPM_VERSION = "8"
 
 [functions]
-  directory = "netlify/functions"
+  directory = "xboard/netlify/functions"
   node_bundler = "esbuild"
 
 [[headers]]
