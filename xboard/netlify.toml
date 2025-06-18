@@ -8,9 +8,8 @@
   PNPM_VERSION = "8"
 
 [functions]
-  directory = "xboard/packages/api/netlify-functions"
+  directory = "xboard/netlify/functions"
   node_bundler = "esbuild"
-  included_files = ["xboard/packages/api/src/**"]
 
 [[headers]]
   for = "/api/*"
