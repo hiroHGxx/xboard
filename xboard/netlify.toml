@@ -8,7 +8,7 @@
   PNPM_VERSION = "8"
 
 [functions]
-  directory = "xboard/functions"
+  directory = "functions"
   node_bundler = "esbuild"
 
 [[headers]]
